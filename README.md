@@ -1,6 +1,10 @@
 # 🔍 k-NN Classifier - Classificação de Frutas
 
 Uma aplicação web interativa que demonstra o algoritmo k-Nearest Neighbors (k-NN) para classificação de frutas baseada em características como doçura e textura.
+## Links 
+- [SLide](https://www.canva.com/design/DAGsW5P_Fgc/9AHrHyGO0ewofR5cAJjfBA/edit?utm_content=DAGsW5P_Fgc&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton)
+- [Documento](https://docs.google.com/document/d/1qVt1BDTsA-nikqle82-3vVd6hRodPWb6/edit?usp=sharing&ouid=101498868145238751132&rtpof=true&sd=true)
+- [Demonstrativo](https://felpsranger.github.io/K-NN/)
 
 ## 📋 Sobre o Projeto
 
