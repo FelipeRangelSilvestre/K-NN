@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>k-NN Classifier</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 25%, #3498db 50%, #2980b9 75%, #1abc9c 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 25%, #3498db 50%, #2980b9 75%, #1abc9c 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+            z-index: 1;
+        }
+        
+        .header * {
+            position: relative;
+            z-index: 2;
+        }
+        
+        .header h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header .subtitle {
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            opacity: 0.9;
+        }
+        
+        .header .academic-info {
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .header .academic-info h2 {
+            font-size: 1.4em;
+            margin-bottom: 10px;
+            color: #ecf0f1;
+        }
+        
+        .header .academic-info p {
+            margin: 5px 0;
+            font-size: 1.1em;
+            color: #bdc3c7;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 30px;
+            padding: 30px;
+        }
+        
+        .visualization-panel {
+            background: linear-gradient(135deg, #ecf0f1 0%, #bdc3c7 100%);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+        
+        .controls-panel {
+            background: linear-gradient(135deg, #ecf0f1 0%, #bdc3c7 100%);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+        
+        .result-card {
+            background: linear-gradient(135deg, #1abc9c 0%, #16a085 100%);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(26, 188, 156, 0.3);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .result-card h2 {
+            color: white;
+            font-size: 1.5em;
+            margin-bottom: 5px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        }
+        
+        .confidence {
+            color: #ecf0f1;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        
+        .control-group {
+            margin-bottom: 25px;
+        }
+        
+        .control-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .slider-container {
+            position: relative;
+            margin-bottom: 10px;
+        }
+        
+        .slider {
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: #ddd;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(52, 152, 219, 0.4);
+            transition: all 0.3s ease;
+        }
+        
+        .slider::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.6);
+        }
+        
+        .slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 8px rgba(52, 152, 219, 0.4);
+        }
+        
+        .slider-value {
+            text-align: center;
+            font-weight: bold;
+            color: #2980b9;
+            margin-top: 5px;
+            font-size: 1.1em;
+        }
+        
+        .warning {
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 15px;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 15px rgba(243, 156, 18, 0.3);
+        }
+        
+        .distances-table {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .distances-table h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .distance-row {
+            display: grid;
+            grid-template-columns: 40px 1fr 60px 60px;
+            gap: 10px;
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+            align-items: center;
+        }
+        
+        .distance-row:last-child {
+            border-bottom: none;
+        }
+        
+        .distance-row.neighbor {
+            background: #e8f5e8;
+            border-radius: 5px;
+        }
+        
+        .votes-section {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .votes-section h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .vote-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            margin-bottom: 5px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+        
+        .vote-percentage {
+            font-weight: bold;
+            color: #2980b9;
+            font-size: 1.1em;
+        }
+        
+        .info-section {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .info-section h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .info-item {
+            margin-bottom: 8px;
+            color: #34495e;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 500px;
+            margin-bottom: 20px;
+        }
+        
+        .explanation {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .explanation h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+        
+        .explanation p {
+            color: #34495e;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 25px;
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: #ecf0f1;
+            border-top: 3px solid #1abc9c;
+        }
+        
+        footer p {
+            margin: 0;
+            font-size: 1.1em;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+        
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 k-NN Classifier</h1>
+            <p class="subtitle">Classificação de Frutas usando k-Nearest Neighbors</p>
+            
+            <div class="academic-info">
+                <h2>📚 Trabalho Acadêmico</h2>
+                <p><strong>Disciplina:</strong> Álgebra Linear</p>
+                <p><strong>Desenvolvido por:</strong> Seu Nome</p>
+                <p><strong>Tema:</strong> Aplicação de Distância Euclidiana e Classificação por Vizinhança</p>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <div class="visualization-panel">
+                <div class="result-card">
+                    <h2 id="resultado">Classificação: Maçã</h2>
+                    <div class="confidence" id="confianca">Confiança: 66.7%</div>
+                </div>
+                
+                <div class="chart-container">
+                    <canvas id="grafico"></canvas>
+                </div>
+                
+                <div class="explanation">
+                    <h3>📖 Como funciona o k-NN</h3>
+                    <p><strong>1. Cálculo de distâncias:</strong> Calcula a distância euclidiana entre o novo ponto e todos os pontos de treinamento.</p>
+                    <p><strong>2. Seleção de vizinhos:</strong> Escolhe os k pontos mais próximos.</p>
+                    <p><strong>3. Classificação:</strong> A classe mais comum entre os vizinhos é escolhida.</p>
+                    <p><strong>Dica:</strong> Use valores ímpares de k para evitar empates!</p>
+                </div>
+            </div>
+            
+            <div class="controls-panel">
+                <div class="control-group">
+                    <label for="docura">Doçura:</label>
+                    <div class="slider-container">
+                        <input type="range" id="docura" class="slider" min="0" max="10" step="0.1" value="5">
+                        <div class="slider-value" id="docura-value">5.0</div>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <label for="textura">Textura:</label>
+                    <div class="slider-container">
+                        <input type="range" id="textura" class="slider" min="0" max="10" step="0.1" value="6">
+                        <div class="slider-value" id="textura-value">6.0</div>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <label for="k">Valor de k:</label>
+                    <div class="slider-container">
+                        <input type="range" id="k" class="slider" min="1" max="7" step="1" value="3">
+                        <div class="slider-value" id="k-value">3</div>
+                    </div>
+                    <div id="k-warning" class="warning" style="display: none;">
+                        ⚠️ Considere usar k ímpar para evitar empates!
+                    </div>
+                </div>
+                
+                <div class="distances-table">
+                    <h3>📊 Distâncias Calculadas</h3>
+                    <div id="tabela-distancias"></div>
+                </div>
+                
+                <div class="votes-section">
+                    <h3>🗳️ Contagem de Votos</h3>
+                    <div id="votos"></div>
+                </div>
+                
+                <div class="info-section">
+                    <h3>ℹ️ Informações</h3>
+                    <div id="info"></div>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p><strong>Desenvolvido para a disciplina de Álgebra Linear</strong><br>
+            Demonstração prática do algoritmo k-NN usando conceitos de distância euclidiana 🎓</p>
+        </footer>
+    </div>
+
+    <script>
+        // Dados de exemplo
+        const dados = [
+            [1, 2], [2, 3], [3, 6], 
+            [6, 9], [7, 10], [8, 8], [9, 2]
+        ];
+        const classes = ['Banana', 'Banana', 'Maçã', 'Maçã', 'Maçã', 'Maçã', 'Banana'];
+        const cores = {'Maçã': '#e74c3c', 'Banana': '#f1c40f'};
+        
+        let chart;
+        
+        // Inicializar gráfico
+        function inicializarGrafico() {
+            const ctx = document.getElementById('grafico').getContext('2d');
+            chart = new Chart(ctx, {
+                type: 'scatter',
+                data: {
+                    datasets: []
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Doçura'
+                            },
+                            min: 0,
+                            max: 10
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Textura'
+                            },
+                            min: 0,
+                            max: 11
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Calcular distância euclidiana
+        function calcularDistancia(p1, p2) {
+            return Math.sqrt(Math.pow(p1[0] - p2[0], 2) + Math.pow(p1[1] - p2[1], 2));
+        }
+        
+        // Atualizar cálculos e visualização
+        function atualizar() {
+            const docura = parseFloat(document.getElementById('docura').value);
+            const textura = parseFloat(document.getElementById('textura').value);
+            const k = parseInt(document.getElementById('k').value);
+            
+            // Atualizar valores dos sliders
+            document.getElementById('docura-value').textContent = docura.toFixed(1);
+            document.getElementById('textura-value').textContent = textura.toFixed(1);
+            document.getElementById('k-value').textContent = k;
+            
+            // Aviso para k par
+            const warning = document.getElementById('k-warning');
+            if (k % 2 === 0) {
+                warning.style.display = 'block';
+            } else {
+                warning.style.display = 'none';
+            }
+            
+            const novoPonto = [docura, textura];
+            
+            // Calcular distâncias
+            const distancias = dados.map(ponto => calcularDistancia(ponto, novoPonto));
+            
+            // Encontrar k vizinhos mais próximos
+            const indicesOrdenados = distancias
+                .map((dist, idx) => ({dist, idx}))
+                .sort((a, b) => a.dist - b.dist)
+                .slice(0, k);
+            
+            const vizinhos = indicesOrdenados.map(item => classes[item.idx]);
+            
+            // Contar votos
+            const votos = {};
+            vizinhos.forEach(classe => {
+                votos[classe] = (votos[classe] || 0) + 1;
+            });
+            
+            // Determinar classe predita
+            const classePredita = Object.keys(votos).reduce((a, b) => votos[a] > votos[b] ? a : b);
+            const confianca = (votos[classePredita] / k * 100).toFixed(1);
+            
+            // Atualizar resultado
+            document.getElementById('resultado').textContent = `Classificação: ${classePredita}`;
+            document.getElementById('confianca').textContent = `Confiança: ${confianca}%`;
+            
+            // Atualizar gráfico
+            atualizarGrafico(novoPonto, indicesOrdenados, classePredita);
+            
+            // Atualizar tabela de distâncias
+            atualizarTabelaDistancias(distancias, indicesOrdenados);
+            
+            // Atualizar votos
+            atualizarVotos(votos, k);
+            
+            // Atualizar informações
+            atualizarInfo(novoPonto, k, classePredita, confianca);
+        }
+        
+        function atualizarGrafico(novoPonto, vizinhos, classePredita) {
+            const datasets = [];
+            
+            // Pontos de treinamento
+            const classesMapa = {};
+            dados.forEach((ponto, idx) => {
+                const classe = classes[idx];
+                if (!classesMapa[classe]) {
+                    classesMapa[classe] = [];
+                }
+                classesMapa[classe].push({
+                    x: ponto[0],
+                    y: ponto[1],
+                    label: String.fromCharCode(65 + idx)
+                });
+            });
+            
+            Object.keys(classesMapa).forEach(classe => {
+                datasets.push({
+                    label: classe,
+                    data: classesMapa[classe],
+                    backgroundColor: cores[classe],
+                    borderColor: cores[classe],
+                    pointRadius: 8
+                });
+            });
+            
+            // Vizinhos destacados
+            const vizinhosData = vizinhos.map(item => ({
+                x: dados[item.idx][0],
+                y: dados[item.idx][1]
+            }));
+            
+            datasets.push({
+                label: 'Vizinhos',
+                data: vizinhosData,
+                backgroundColor: 'transparent',
+                borderColor: 'black',
+                borderWidth: 3,
+                pointRadius: 12,
+                showLine: false
+            });
+            
+            // Novo ponto
+            datasets.push({
+                label: 'Novo Ponto',
+                data: [{x: novoPonto[0], y: novoPonto[1]}],
+                backgroundColor: cores[classePredita],
+                borderColor: 'black',
+                borderWidth: 2,
+                pointRadius: 15,
+                pointStyle: 'star'
+            });
+            
+            chart.data.datasets = datasets;
+            chart.update();
+        }
+        
+        function atualizarTabelaDistancias(distancias, vizinhos) {
+            const tabela = document.getElementById('tabela-distancias');
+            const vizinhosIdx = new Set(vizinhos.map(v => v.idx));
+            
+            const linhas = distancias
+                .map((dist, idx) => ({dist, idx}))
+                .sort((a, b) => a.dist - b.dist);
+            
+            let html = '';
+            linhas.forEach(item => {
+                const isVizinho = vizinhosIdx.has(item.idx);
+                const classe = classes[item.idx];
+                html += `
+                    <div class="distance-row ${isVizinho ? 'neighbor' : ''}">
+                        <div>${String.fromCharCode(65 + item.idx)}</div>
+                        <div>${classe}</div>
+                        <div>${item.dist.toFixed(2)}</div>
+                        <div>${isVizinho ? '✓' : ''}</div>
+                    </div>
+                `;
+            });
+            
+            tabela.innerHTML = html;
+        }
+        
+        function atualizarVotos(votos, k) {
+            const container = document.getElementById('votos');
+            let html = '';
+            
+            Object.keys(votos).forEach(classe => {
+                const quantidade = votos[classe];
+                const porcentagem = (quantidade / k * 100).toFixed(1);
+                html += `
+                    <div class="vote-item">
+                        <span>${classe}: ${quantidade}/${k}</span>
+                        <span class="vote-percentage">${porcentagem}%</span>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+        
+        function atualizarInfo(novoPonto, k, classePredita, confianca) {
+            const info = document.getElementById('info');
+            info.innerHTML = `
+                <div class="info-item"><strong>Novo ponto:</strong> (${novoPonto[0].toFixed(1)}, ${novoPonto[1].toFixed(1)})</div>
+                <div class="info-item"><strong>Algoritmo:</strong> k-NN com k=${k}</div>
+                <div class="info-item"><strong>Métrica:</strong> Distância Euclidiana</div>
+                <div class="info-item"><strong>Resultado:</strong> ${classePredita} (${confianca}%)</div>
+            `;
+        }
+        
+        // Event listeners
+        document.getElementById('docura').addEventListener('input', atualizar);
+        document.getElementById('textura').addEventListener('input', atualizar);
+        document.getElementById('k').addEventListener('input', atualizar);
+        
+        // Inicializar aplicação
+        window.onload = function() {
+            inicializarGrafico();
+            atualizar();
+        };
+    </script>
+</body>
+</html>
