@@ -2,8 +2,8 @@
 
 Uma aplicação web interativa que demonstra o algoritmo k-Nearest Neighbors (k-NN) para classificação de frutas baseada em características como doçura e textura.
 ## 🔗 Links 
-- [SLide](https://www.canva.com/design/DAGsW5P_Fgc/9AHrHyGO0ewofR5cAJjfBA/edit?utm_content=DAGsW5P_Fgc&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton)
-- [Documento](https://docs.google.com/document/d/1qVt1BDTsA-nikqle82-3vVd6hRodPWb6/edit?usp=sharing&ouid=101498868145238751132&rtpof=true&sd=true)
+- [SLide](https://www.canva.com/design/DAGsW5P_Fgc/9AHrHyGO0ewofR5cAJjfBA/edit?utm_content=DAGsW5P_Fgc&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutto)
+- [Documento](https://1drv.ms/w/c/16546ceea9e114f6/EVAnlia5MXlNuRl38T3lZEgBoDtkpl26Pere2PbnW-x6wA?e=CTNfYY)
 - [Demonstrativo](https://felpsranger.github.io/K-NN/)
 
 ## 📋 Sobre o Projeto
