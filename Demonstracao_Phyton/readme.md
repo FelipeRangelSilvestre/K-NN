@@ -225,10 +225,6 @@ sudo yum install tkinter
 
 Este projeto está sob a licença MIT. Veja o arquivo `LICENSE` para mais detalhes.
 
-## 👥 Autores
-
-- **Desenvolvimento**: Demonstração acadêmica de Machine Learning
-- **Inspiração**: Algoritmo k-NN clássico da literatura
 
 ## 🙏 Agradecimentos
 
