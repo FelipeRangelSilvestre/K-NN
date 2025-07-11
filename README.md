@@ -1,3 +1,23 @@
+# Trabalho-patrico
+Curso: 
+* Sistemas de informação
+
+Disciplina: 
+* Álgebra Linear 2025/01
+
+Integrantes:
+* A1: Felipe Rangel Silvestre 
+* A2: Gustavo Souza 
+* A3: Iasmim Braga Bélem 
+* A4: Kaio Sobral 
+* A5: Marcelo Barros 
+
+Docente: 
+* Fernando Soares
+
+Sistema:
+* k-NN Classifier
+
 # 🔍 k-NN Classifier - Classificação de Frutas
 
 Uma aplicação web interativa que demonstra o algoritmo k-Nearest Neighbors (k-NN) para classificação de frutas baseada em características como doçura e textura.
